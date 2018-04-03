@@ -77,15 +77,10 @@ function install_puppetmaster() {
     mkdir -p /opt/puppet-enterprise
   fi
   if [ ! -f /opt/puppet-enterprise/puppet-enterprise-installer ]; then
-    case ${breed} in
-      "redhat")
-        ntpdate -u metadata.google.internal
-        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-el-6-x86_64.tar.gz" ;;
-      "debian")
-        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-debian-7-amd64.tar.gz" ;;
-    esac
+    ntpdate -u metadata.google.internal
+        curl -L -o /opt/pe-installer.tgz 'https://pm.puppet.com/cgi-bin/download.cgi?dist=ubuntu&rel=16.04&arch=amd64&ver=latest' ;;
     #Drop installer in predictable location
-    tar --extract --file=/opt/pe-installer.tar.gz --strip-components=1 --directory=/opt/puppet-enterprise
+    tar --extract --file=/opt/pe-installer.tgz --strip-components=1 --directory=/opt/puppet-enterprise
   fi
   write_masteranswers
   /opt/puppet-enterprise/puppet-enterprise-installer -a /opt/masteranswers.txt
@@ -102,15 +97,11 @@ function install_puppetagent () {
     mkdir -p /opt/puppet-enterprise
   fi
   if [ ! -f /opt/puppet-enterprise/puppet-enterprise-installer ]; then
-    case ${breed} in
-      "redhat")
         ntpdate -u metadata.google.internal
-        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-el-6-x86_64.tar.gz" ;;
-      "debian")
-        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-debian-7-amd64.tar.gz" ;;
-    esac
+        curl -L -o /opt/pe-installer.tgz 'https://pm.puppet.com/puppet-agent/2017.3.5/5.3.5/repos/deb/xenial/PC1/puppet-agent_5.3.5-1xenial_amd64.deb' ;;
+    
     #Drop installer in predictable location
-    tar --extract --file=/opt/pe-installer.tar.gz --strip-components=1 --directory=/opt/puppet-enterprise
+    tar --extract --file=/opt/pe-installer.tgz --strip-components=1 --directory=/opt/puppet-enterprise
   fi
   write_agentanswers
   /opt/puppet-enterprise/puppet-enterprise-installer -a /opt/agentanswers.txt
