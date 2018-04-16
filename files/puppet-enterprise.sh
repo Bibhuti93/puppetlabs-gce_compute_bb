@@ -83,7 +83,7 @@ function install_puppetmaster() {
     tar --extract --file=/opt/pe-installer.tgz --strip-components=1 --directory=/opt/puppet-enterprise
   fi
   write_masteranswers
-  /opt/puppet-enterprise/puppet-enterprise-installer -a /opt/masteranswers.txt
+  /opt/puppet-enterprise/puppet-enterprise-installer -c /opt/masteranswers.txt
 }
 
 function download_modules() {
@@ -104,7 +104,7 @@ function install_puppetagent () {
     tar --extract --file=/opt/pe-installer.tgz --strip-components=1 --directory=/opt/puppet-enterprise
   fi
   write_agentanswers
-  /opt/puppet-enterprise/puppet-enterprise-installer -a /opt/agentanswers.txt
+  /opt/puppet-enterprise/puppet-enterprise-installer -c /opt/agentanswers.txt
 }
 
 function clone_modules() {
