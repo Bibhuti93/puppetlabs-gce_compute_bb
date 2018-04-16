@@ -24,7 +24,7 @@ q_install=y
 q_pe_database=y
 q_puppet_cloud_install=y
 q_puppet_enterpriseconsole_auth_password=$PUPPET_PE_CONSOLEPWD
-q_puppet_enterpriseconsole_auth_user_email="$PUPPET_PE_CONSOLEADMIN"
+q_puppet_enterpriseconsole_auth_user_email=$PUPPET_PE_CONSOLEADMIN
 q_puppet_enterpriseconsole_httpd_port=443
 q_puppet_enterpriseconsole_install=y
 q_puppet_enterpriseconsole_master_hostname=$PUPPET_HOSTNAME
@@ -48,6 +48,7 @@ q_puppetmaster_enterpriseconsole_port=443
 q_puppetmaster_install=y
 q_run_updtvpkg=n
 q_vendor_packages_install=y
+q_enable_future_parser=y
 ANSWERS
 }
 
@@ -77,13 +78,18 @@ function install_puppetmaster() {
     mkdir -p /opt/puppet-enterprise
   fi
   if [ ! -f /opt/puppet-enterprise/puppet-enterprise-installer ]; then
-    ntpdate -u metadata.google.internal
-        curl -L -o /opt/pe-installer.tgz 'https://pm.puppet.com/cgi-bin/download.cgi?dist=ubuntu&rel=16.04&arch=amd64&ver=latest' ;;
+    case ${breed} in
+      "redhat")
+        ntpdate -u metadata.google.internal
+        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-el-6-x86_64.tar.gz" ;;
+      "debian")
+        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-debian-7-amd64.tar.gz" ;;
+    esac
     #Drop installer in predictable location
-    tar --extract --file=/opt/pe-installer.tgz --strip-components=1 --directory=/opt/puppet-enterprise
+    tar --extract --file=/opt/pe-installer.tar.gz --strip-components=1 --directory=/opt/puppet-enterprise
   fi
   write_masteranswers
-  /opt/puppet-enterprise/puppet-enterprise-installer -c /opt/masteranswers.txt
+  /opt/puppet-enterprise/puppet-enterprise-installer -a /opt/masteranswers.txt
 }
 
 function download_modules() {
@@ -97,14 +103,18 @@ function install_puppetagent () {
     mkdir -p /opt/puppet-enterprise
   fi
   if [ ! -f /opt/puppet-enterprise/puppet-enterprise-installer ]; then
+    case ${breed} in
+      "redhat")
         ntpdate -u metadata.google.internal
-        curl -L -o /opt/pe-installer.tgz 'https://pm.puppet.com/puppet-agent/2017.3.5/5.3.5/repos/deb/xenial/PC1/puppet-agent_5.3.5-1xenial_amd64.deb' ;;
-    
+        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-el-6-x86_64.tar.gz" ;;
+      "debian")
+        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-debian-7-amd64.tar.gz" ;;
+    esac
     #Drop installer in predictable location
-    tar --extract --file=/opt/pe-installer.tgz --strip-components=1 --directory=/opt/puppet-enterprise
+    tar --extract --file=/opt/pe-installer.tar.gz --strip-components=1 --directory=/opt/puppet-enterprise
   fi
   write_agentanswers
-  /opt/puppet-enterprise/puppet-enterprise-installer -c /opt/agentanswers.txt
+  /opt/puppet-enterprise/puppet-enterprise-installer -a /opt/agentanswers.txt
 }
 
 function clone_modules() {
